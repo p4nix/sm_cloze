@@ -17,6 +17,21 @@ def get_config_value(key):
     except (KeyError, TypeError):
         return None
 
+def get_config_value_or_default(key, default):
+    config = _get_config(_get_cache_key())
+    try:
+        if isinstance(key, str):
+            return config[key]
+        else:
+            d = config
+            for k in key:
+                d = d[k]
+            return d
+
+    except KeyError:
+        return default
+
+
 def update_config(key, value):
     config = _get_config(_get_cache_key())
     config[key] = value

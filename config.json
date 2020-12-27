@@ -1,4 +1,5 @@
 {
   "model_name": "ALL_SMCloze",
-  "num_clozes": 20
+  "shortcut.extract_text": "Alt+X",
+  "shortcut.cloze_text": "Alt+Z"
 }

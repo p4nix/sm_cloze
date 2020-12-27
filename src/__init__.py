@@ -1,37 +1,32 @@
-from aqt import mw
+from .editor import initialize_editor
+
+import aqt
+from aqt import mw, gui_hooks
 from aqt.utils import showInfo
-from aqt.qt import QAction
-from aqt import gui_hooks
-from anki.hooks import wrap
+from aqt.qt import *
+from aqt.editor import Editor
+from aqt.addcards import AddCards
 
-from aqt.reviewer import Reviewer
-
-from .options import open_options
-from .config import get_config_value
-from .view import View
-
-
-def initialize():
-    # initialize menu
-    manage_smcloze = QAction("Manage SM-Cloze", mw)
-    manage_smcloze.triggered.connect(open_options)
-
-    mw.form.menuTools.addAction(manage_smcloze)
-
-    # initialize reviewer
-    view = View()
-
-    gui_hooks.reviewer_did_show_question.append(view.new_question)
-
-def init_after_profile_open():
-    if mw.col.models.byName(get_config_value("model_name")):
-        return
-
-    showInfo("Please go to Tools>Manage SM-Cloze")
+from .utils import get_config_value
+from .consts import ADDON_NAME, EXTRACT_MODEL
+from .extract import Extract, extract_widget
+from .template import initialize_models
 
 
+def check_card_for_extract(card):
+    note = card.note()
 
+    if note.model()["name"] == EXTRACT_MODEL and card.ord == 0:
+        extract_widget.change_note(card.note())
+        extract_widget.enable()
+        mw.requireReset()
 
+def delayed_init():
+    initialize_models()
 
-initialize()
-gui_hooks.profile_did_open.append(init_after_profile_open)
+initialize_editor()
+
+gui_hooks.reviewer_did_show_question.append(check_card_for_extract)
+gui_hooks.profile_did_open.append(delayed_init)
+
+mw.addonManager.setWebExports(ADDON_NAME, ".*\\.(js|css|map|png|svg|ttf)$")
