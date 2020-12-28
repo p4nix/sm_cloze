@@ -36,3 +36,12 @@ class TinyMCE(AnkiWebView):
 
         elif cmd == "extractor-loaded":
             self.parent.enable()
+
+    def cloze_html(self):
+        self.eval("do_html_cloze();")
+
+    def extract_html(self):
+        self.eval("do_html_extract();")
+
+    def load_content(self, content):
+        self.eval(f"load_html(`{content}`);")

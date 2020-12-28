@@ -1,5 +1,7 @@
 {
   "model_name": "ALL_SMCloze",
+  "retain_extra": true,
+  "auto_review_new_clozes": true,
   "shortcut.extract_text": "Alt+X",
   "shortcut.cloze_text": "Alt+Z"
 }
