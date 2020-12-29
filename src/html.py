@@ -40,7 +40,7 @@ css = """
 }
 p {margin: 0; padding: 0;}
 #edit_field{
-	font-size: 13px;
+	font-size: 20px;
 	border: 1px solid white;
 	border-radius: 5px;
 	padding: 10px;

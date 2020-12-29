@@ -1,4 +1,6 @@
-ADDON_NAME = "sm_cloze"
+from aqt import mw
+
+ADDON_NAME = mw.addonManager.addonFromModule(__name__)
 
 EXTRACT_MODEL = "ALL_SMCloze"
 EXTRACT_CARD = "smcloze"
