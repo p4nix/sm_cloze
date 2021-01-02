@@ -30,7 +30,10 @@ cloze_back = """
 
 <br><br><br>
 <div id="edit_field">{{edit:%s}}</div>
+{{#Extra}}
+<br><br>
 {{Extra}}
+{{/Extra}}
 """
 
 css = """
