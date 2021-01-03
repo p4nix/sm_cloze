@@ -203,7 +203,8 @@ class Extract(QWidget):
         mw.col.addNote(new_note)
         self.note[EXTRACT_FLDS["c_id"]] += str(new_note.id) + ","
 
-        self.do_action_after_save = ["change_note", new_note]
+        if get_config_value("switch_to_extract_on_extract"):
+            self.do_action_after_save = ["change_note", new_note]
 
         review_card(new_note.cards()[0])
         tooltip("Bumped text-note to review interval!")

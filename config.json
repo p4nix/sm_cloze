@@ -2,6 +2,7 @@
   "model_name": "ALL_SMCloze",
   "retain_extra": true,
   "auto_review_new_clozes": true,
+  "switch_to_extract_on_extract": false,
   "shortcut.extract_text": "Alt+X",
   "shortcut.cloze_text": "Alt+Z"
 }
