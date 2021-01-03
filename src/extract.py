@@ -31,6 +31,8 @@ class Extract(QWidget):
         self.init_sidebar()
         self.init_shortcuts()
 
+        self.original = None
+
 
     def init_sidebar(self):
         self.title_box = QHBoxLayout()
@@ -80,9 +82,12 @@ class Extract(QWidget):
         self.escape = QShortcut("Escape", self)
         self.escape.activated.connect(self.disable)
 
-    def change_note(self, note):
+    def change_note(self, note, set_original = False):
         if note is None:
             return
+
+        if set_original == True:
+            self.original = note
 
         self.do_action_after_save = None
 
@@ -93,8 +98,17 @@ class Extract(QWidget):
         self.get_parent()
         self.get_children()
 
+        if self.original and self.original.id == note.id:
+            self.toggle_button_activity(True)
+        else:
+            self.toggle_button_activity(False)
+
         self.tinyMCE.load_content(self.note["Text"])
 
+    def toggle_button_activity(self, state):
+        self.review_button.setEnabled(state)
+        self.suspend_button.setEnabled(state)
+        self.bury_button.setEnabled(state)
 
 
     """
@@ -190,6 +204,10 @@ class Extract(QWidget):
         self.note[EXTRACT_FLDS["c_id"]] += str(new_note.id) + ","
 
         self.do_action_after_save = ["change_note", new_note]
+
+        review_card(new_note.cards()[0])
+        tooltip("Bumped text-note to review interval!")
+
         self.save_note()
 
     def save_note(self, callback = None):

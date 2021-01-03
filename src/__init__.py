@@ -17,7 +17,7 @@ def check_card_for_extract(card):
     note = card.note()
 
     if note.model()["name"] == EXTRACT_MODEL and card.ord == 0:
-        extract_widget.change_note(card.note())
+        extract_widget.change_note(card.note(), set_original = True)
         extract_widget.enable()
         mw.requireReset()
 
