@@ -205,6 +205,8 @@ class Extract(QWidget):
 
         if get_config_value("switch_to_extract_on_extract"):
             self.do_action_after_save = ["change_note", new_note]
+        else:
+            self.do_action_after_save = ["change_note", self.note]
 
         review_card(new_note.cards()[0])
         tooltip("Bumped text-note to review interval!")
@@ -221,7 +223,7 @@ class Extract(QWidget):
 
             if self.do_action_after_save:
                 action = self.do_action_after_save[0]
-                item = self.do_action_after_save[1]
+                item   = self.do_action_after_save[1]
                 self.do_action_after_save = None
                 self.do_action(action, item)
 
