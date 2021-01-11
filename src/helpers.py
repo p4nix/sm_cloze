@@ -4,6 +4,9 @@ import time
 import re
 from bs4 import BeautifulSoup
 
+def strip_length(text, length = 80):
+    return (text[:length-3] + '..') if len(text) > length else text
+    
 def strip_html(text):
     return BeautifulSoup(text, features="html.parser").get_text()
 

@@ -10,31 +10,32 @@ from .consts import ADDON_NAME, EXTRACT_MAX, EXTRACT_FLDS, EXTRACT_MODEL
 from .tinymce import TinyMCE
 import re
 from anki.notes import Note
-from .helpers import review_card, review_clozes, get_notes_from_string, strip_html
+from .helpers import review_card, review_clozes, get_notes_from_string, strip_html, strip_length
 
 
 
 class Extract(QWidget):
     def set_addcards(self, addcards):
-        self.addcards = addcards
-        self.editor_web = addcards.editor.web
+        self.addcards    = addcards
+        self.editor_web  = addcards.editor.web
         self.editor_note = self.addcards.editor.note
 
     def __init__(self):
         QWidget.__init__(self)
 
         self.tinyMCE = TinyMCE(self)
+        self.geometry = None
 
         self.setWindowTitle("Extract")
         self.setWindowFlag(Qt.Dialog)
 
-        self.init_sidebar()
+        self.init_gui()
         self.init_shortcuts()
 
         self.original = None
 
 
-    def init_sidebar(self):
+    def init_gui(self):
         self.title_box = QHBoxLayout()
 
         self.parent_button = QPushButton("Parent")
@@ -65,9 +66,14 @@ class Extract(QWidget):
         self.bottom_box.addWidget(self.bury_button)
         self.bottom_box.addWidget(self.review_button)
 
+        self.le_context = QLineEdit()
+        self.le_tags = QLineEdit()
+
         self.vbox = QVBoxLayout()
         self.vbox.addLayout(self.title_box)
+        self.vbox.addWidget(self.le_context)
         self.vbox.addWidget(self.tinyMCE)
+        self.vbox.addWidget(self.le_tags)
         self.vbox.addLayout(self.bottom_box)
 
         self.setLayout(self.vbox)
@@ -95,8 +101,20 @@ class Extract(QWidget):
         card = self.get_text_card()
         self.did = card.odid or card.did
 
+        # get tag and context
+        if note[EXTRACT_FLDS["cx"]]:
+            self.le_context.setText(note[EXTRACT_FLDS["cx"]])
+        else:
+            self.le_context.setText("")
+
+        if note.stringTags():
+            self.le_tags.setText(note.stringTags())
+        else:
+            self.le_tags.setText("")
+
         self.get_parent()
         self.get_children()
+        self.get_clozes()
 
         if self.original and self.original.id == note.id:
             self.toggle_button_activity(True)
@@ -140,9 +158,20 @@ class Extract(QWidget):
             children_string += str(note.id) + ","
             info = strip_html(note[EXTRACT_FLDS["tx"]])
             info = info.replace('\n', ' ')
-            info = (info[:77] + '..') if len(info) > 80 else info
+            info = strip_length(info)
             self.children_button.addItem(info, note.id)
         self.note[EXTRACT_FLDS["c_id"]] = children_string
+
+    def get_clozes(self):
+        self.clozes_button.clear()
+
+        for i in range(1, EXTRACT_MAX + 1):
+            field = EXTRACT_FLDS["c_"] + str(i)
+            text = self.note[field]
+            if text:
+                text = strip_html(text)
+                text = strip_length(text)
+                self.clozes_button.addItem(text, field)
 
 
 
@@ -198,7 +227,7 @@ class Extract(QWidget):
         if get_config_value("retain_extra"):
             new_note[EXTRACT_FLDS["ex"]] = self.note[EXTRACT_FLDS["ex"]]
 
-        new_note.setTagsFromStr(self.note.stringTags())
+        new_note.setTagsFromStr(self.le_tags.text())
 
         mw.col.addNote(new_note)
         self.note[EXTRACT_FLDS["c_id"]] += str(new_note.id) + ","
@@ -216,10 +245,14 @@ class Extract(QWidget):
     def save_note(self, callback = None):
         note = self.note
         def cb(text: str):
-            note["Text"] = text
+            note[EXTRACT_FLDS["tx"]] = text
+            note.setTagsFromStr(self.le_tags.text())
+            note[EXTRACT_FLDS["cx"]] = self.le_context.text()
+
             note.flush()
 
             review_clozes(note)
+            self.get_clozes()
 
             if self.do_action_after_save:
                 action = self.do_action_after_save[0]
@@ -261,11 +294,15 @@ class Extract(QWidget):
         Enable/Disable dialog
     """
     def enable(self):
+        if self.geometry:
+            self.restoreGeometry(self.geometry)
         self.setVisible(True)
         self.raise_()
         self.is_enabled = True
 
     def disable(self):
+        self.geometry = self.saveGeometry()
+
         self.setVisible(False)
         self.is_enabled = False
 

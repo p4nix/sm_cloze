@@ -10,7 +10,6 @@ function load_html(content){
 
   tinymce.init({
     selector: "#extractor-tinymce",
-    plugins: 'anchor, link',
     menubar: false,
     resize: false,
     statusbar: false,
